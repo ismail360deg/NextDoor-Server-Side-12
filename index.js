@@ -13,22 +13,34 @@ app.use(cors());
 app.use(express.json());
 
 
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rgz3uon.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
 async function run() {
     try {
+        const categoryCollection = client.db('nextDoor').collection('category');
+        const cardInfoCollection = client.db('nextDoor').collection('cardInfo');
 
-
+        app.get('/category', async (req, res) => {
+            if (req.query.brand) {
+                const query = { brand: req.query.brand };
+                const result = await categoryCollection.find(query).toArray();
+                console.log(result);
+                res.send(result);
+            }
+            else {
+                const query = {};
+                const result = await categoryCollection.find(query).toArray();
+                res.send(result);
+            }
+        })
     }
     finally {
 
     }
 }
+
 run().catch(console.log);
 
 
