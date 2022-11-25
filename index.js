@@ -21,7 +21,7 @@ async function run() {
     try {
         const categoryCollection = client.db('nextDoor').collection('category');
         const cardInfoCollection = client.db('nextDoor').collection('cardInfo');
-        const productCollection = client.db('nextDoor').collection('product');
+        const productCollection = client.db('nextDoor').collection('products');
 
         app.get('/category', async (req, res) => {
             if (req.query.brand) {
@@ -42,6 +42,13 @@ async function run() {
             const result = await cardInfoCollection.find(query).toArray();
             res.send(result);
         })
+
+        app.post('/products', async (req, res) => {
+            const booking = req.body;
+            const result = await productCollection.insertOne(booking);
+            res.send(result);
+        });
+
     }
     finally {
 
