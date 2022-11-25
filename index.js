@@ -21,6 +21,7 @@ async function run() {
     try {
         const categoryCollection = client.db('nextDoor').collection('category');
         const cardInfoCollection = client.db('nextDoor').collection('cardInfo');
+        const productCollection = client.db('nextDoor').collection('product');
 
         app.get('/category', async (req, res) => {
             if (req.query.brand) {
@@ -34,6 +35,12 @@ async function run() {
                 const result = await categoryCollection.find(query).toArray();
                 res.send(result);
             }
+        })
+
+        app.get('/cardInfo', async (req, res) => {
+            const query = {};
+            const result = await cardInfoCollection.find(query).toArray();
+            res.send(result);
         })
     }
     finally {
