@@ -22,6 +22,7 @@ async function run() {
         const categoryCollection = client.db('nextDoor').collection('category');
         const cardInfoCollection = client.db('nextDoor').collection('cardInfo');
         const productCollection = client.db('nextDoor').collection('products');
+        const usersCollection = client.db('nextDoor').collection('users');
 
         app.get('/category', async (req, res) => {
             if (req.query.brand) {
@@ -55,6 +56,13 @@ async function run() {
         app.post('/products', async (req, res) => {
             const booking = req.body;
             const result = await productCollection.insertOne(booking);
+            res.send(result);
+        });
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await usersCollection.insertOne(user);
             res.send(result);
         });
 
