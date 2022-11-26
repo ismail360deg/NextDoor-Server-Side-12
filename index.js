@@ -45,6 +45,17 @@ async function run() {
         const usersCollection = client.db('nextDoor').collection('users');
         const myProductsCollection = client.db('nextDoor').collection('myProducts');
 
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        }
+
         app.get('/category', async (req, res) => {
             if (req.query.brand) {
                 const query = { brand: req.query.brand };
@@ -71,7 +82,12 @@ async function run() {
             res.send(result);
         })
 
-
+        app.delete('/orders/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(filter);
+            res.send(result);
+        })
 
         app.get('/orders', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -109,6 +125,13 @@ async function run() {
             res.send(users);
         });
 
+        app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        })
+
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
@@ -123,15 +146,7 @@ async function run() {
             res.send(result);
         });
 
-        app.put('/users/admin/:id', verifyJWT, async (req, res) => {
-            const decodedEmail = req.decoded.email;
-            const query = { email: decodedEmail };
-            const user = await usersCollection.findOne(query);
-
-            if (user?.role !== 'admin') {
-                return res.status(403).send({ message: 'forbidden access' });
-            }
-
+        app.put('/users/admin/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true };
@@ -146,19 +161,19 @@ async function run() {
 
 
 
-        app.get('/myProducts', async (req, res) => {
+        app.get('/myProducts', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {};
             const myProduct = await myProductsCollection.find(query).toArray();
             res.send(myProduct);
         })
 
-        app.post('/myProducts', async (req, res) => {
+        app.post('/myProducts', verifyJWT, verifyAdmin, async (req, res) => {
             const myProduct = req.body;
             const result = await myProductsCollection.insertOne(myProduct);
             res.send(result);
         });
 
-        app.delete('/myProducts/:id', async (req, res) => {
+        app.delete('/myProducts/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const result = await myProductsCollection.deleteOne(filter);
