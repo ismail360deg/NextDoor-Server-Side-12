@@ -43,6 +43,7 @@ async function run() {
         const cardInfoCollection = client.db('nextDoor').collection('cardInfo');
         const productCollection = client.db('nextDoor').collection('products');
         const usersCollection = client.db('nextDoor').collection('users');
+        const myProductsCollection = client.db('nextDoor').collection('myProducts');
 
         app.get('/category', async (req, res) => {
             if (req.query.brand) {
@@ -56,6 +57,12 @@ async function run() {
                 const result = await categoryCollection.find(query).toArray();
                 res.send(result);
             }
+        })
+
+        app.get('/appointmentSpecialty', async (req, res) => {
+            const query = {}
+            const result = await appointmentOptionCollection.find(query).project({ name: 1 }).toArray();
+            res.send(result);
         })
 
         app.get('/cardInfo', async (req, res) => {
@@ -136,6 +143,29 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         });
+
+
+
+        app.get('/myProducts', async (req, res) => {
+            const query = {};
+            const myProduct = await myProductsCollection.find(query).toArray();
+            res.send(myProduct);
+        })
+
+        app.post('/myProducts', async (req, res) => {
+            const myProduct = req.body;
+            const result = await myProductsCollection.insertOne(myProduct);
+            res.send(result);
+        });
+
+        app.delete('/myProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await myProductsCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+
 
     }
     finally {
